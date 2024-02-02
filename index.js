@@ -42,8 +42,23 @@ app.get("/github-callback", async (req, res) => {
     })
 
     const data = await response.json()
-
     console.log(data)
+
+    const respUser = await fetch("https://api.github.com/user", {
+        headers: { 'Authorization': `Bearer ${data.access_token}`}
+    })
+
+    const userData = await respUser.json()
+
+    console.log(userData)
+
+    const localToken = jwt.sign({
+        sub: userData.id,
+        username: userData.login,
+        name: userData.name
+    }, process.env.JWT_SECRET, { expiresIn: '1h' })
+
+    res.redirect(`/?token=${localToken}`)
 
 });
 
